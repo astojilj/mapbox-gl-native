@@ -82,7 +82,7 @@ void Transform::jumpTo(const CameraOptions& camera) {
  * not included in `options`.
  */
 void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
-    const EdgeInsets& padding = camera.padding;
+    const EdgeInsets& padding = camera.padding.value_or(state.edgeInsets);
     LatLng startLatLng = getLatLng(padding, LatLng::Unwrapped);
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
     const LatLng& latLng = state.bounds != LatLngBounds::unbounded() ? unwrappedLatLng : unwrappedLatLng.wrapped();
@@ -127,6 +127,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     const double startScale = state.scale;
     const double startBearing = state.bearing;
     const double startPitch = state.pitch;
+    const EdgeInsets startPadding = state.edgeInsets;
     state.panning = unwrappedLatLng != startLatLng;
     state.scaling = scale != startScale;
     state.rotating = bearing != startBearing;
@@ -144,7 +145,8 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
             state.pitch = util::interpolate(startPitch, pitch, t);
         }
 
-        if (!padding.isFlush()) {
+        if (padding != startPadding) {
+            state.edgeInsets = padding;
             state.moveLatLng(frameLatLng, center);
         }
     }, duration);
@@ -159,7 +161,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     Where applicable, local variable documentation begins with the associated
     variable or function in van Wijk (2003). */
 void Transform::flyTo(const CameraOptions &camera, const AnimationOptions &animation) {
-    const EdgeInsets& padding = camera.padding;
+    const EdgeInsets& padding = camera.padding.value_or(state.edgeInsets);
     const LatLng& latLng = camera.center.value_or(getLatLng(padding, LatLng::Unwrapped)).wrapped();
     double zoom = camera.zoom.value_or(getZoom());
     double bearing = camera.bearing ? -*camera.bearing * util::DEG2RAD : getBearing();
@@ -275,6 +277,7 @@ void Transform::flyTo(const CameraOptions &camera, const AnimationOptions &anima
     }
 
     const double startScale = state.scale;
+    const EdgeInsets startPadding = state.edgeInsets;
     state.panning = true;
     state.scaling = true;
     state.rotating = bearing != startBearing;
@@ -304,8 +307,9 @@ void Transform::flyTo(const CameraOptions &camera, const AnimationOptions &anima
         if (pitch != startPitch) {
             state.pitch = util::interpolate(startPitch, pitch, k);
         }
-
-        if (!padding.isFlush()) {
+        
+        if (padding != startPadding) {
+            state.edgeInsets = padding;
             state.moveLatLng(frameLatLng, center);
         }
     }, duration);

@@ -15,19 +15,19 @@ namespace mbgl {
     center point when both are set.
     */
 struct CameraOptions {
-    CameraOptions& withCenter(const optional<LatLng>& o) { center = o; return *this; }
+    CameraOptions& withCenter(const LatLng& o) { center = o; return *this; }
     CameraOptions& withPadding(const EdgeInsets& p) { padding = p; return *this; }
-    CameraOptions& withAnchor(const optional<ScreenCoordinate>& o) { anchor = o; return *this; }
-    CameraOptions& withZoom(const optional<double>& o) { zoom = o; return *this; }
-    CameraOptions& withBearing(const optional<double>& o) { bearing = o; return *this; }
-    CameraOptions& withPitch(const optional<double>& o) { pitch = o; return *this; }
+    CameraOptions& withAnchor(const ScreenCoordinate& o) { anchor = o; return *this; }
+    CameraOptions& withZoom(const double o) { zoom = o; return *this; }
+    CameraOptions& withBearing(const double o) { bearing = o; return *this; }
+    CameraOptions& withPitch(const double o) { pitch = o; return *this; }
 
     /** Coordinate at the center of the map. */
     optional<LatLng> center;
 
     /** Padding around the interior of the view that affects the frame of
         reference for `center`. */
-    EdgeInsets padding;
+    optional<EdgeInsets> padding;
 
     /** Point of reference for `zoom` and `angle`, assuming an origin at the
         top-left corner of the view. */

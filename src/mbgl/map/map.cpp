@@ -158,7 +158,8 @@ void Map::pitchBy(double pitch, const AnimationOptions& animation) {
 
 void Map::scaleBy(double scale, optional<ScreenCoordinate> anchor, const AnimationOptions& animation) {
     const double zoom = impl->transform.getZoom() + impl->transform.getState().scaleZoom(scale);
-    easeTo(CameraOptions().withZoom(zoom).withAnchor(anchor), animation);
+    CameraOptions cameraOptions = CameraOptions().withZoom(zoom);
+    easeTo(anchor ? cameraOptions.withAnchor(*anchor) : cameraOptions, animation);
 }
 
 void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& animation) {
@@ -240,7 +241,14 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs, const Ed
     Transform transform(impl->transform.getState());
 
     if (bearing || pitch) {
-        transform.jumpTo(CameraOptions().withBearing(bearing).withPitch(pitch));
+        CameraOptions cameraOptions;
+        if (bearing) {
+            cameraOptions.withBearing(*bearing);
+        }
+        if (pitch) {
+            cameraOptions.withPitch(*pitch);
+        }
+        transform.jumpTo(cameraOptions);
     }
 
     return mbgl::cameraForLatLngs(latLngs, transform, padding)
